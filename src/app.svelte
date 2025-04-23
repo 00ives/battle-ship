@@ -2,11 +2,12 @@
   import GameboardContainer from '$lib/components/gameboard/GameboardContainer.svelte';
   import Setup from '$lib/components/Setup/setup.svelte';
   import { useApp } from '$lib/providers/app';
-
+//test
   const { setupService } = useApp().services;
 </script>
 
 <Setup />
+
 
 <GameboardContainer
   numberOfShips={2}
