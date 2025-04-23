@@ -1,7 +1,10 @@
 <script lang="ts">
-	import '../app.css';
+  import ServiceProvider from '$lib/providers/ServiceProvider.svelte';
+  import '../app.css';
 
-	let { children } = $props();
+  let { children } = $props();
 </script>
 
-{@render children()}
+<ServiceProvider>
+  {@render children()}
+</ServiceProvider>
