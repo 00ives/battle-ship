@@ -1,11 +1,9 @@
 <script lang="ts">
   import { useApp } from '$lib/providers/app';
-  import { onDestroy, onMount } from 'svelte';
-  import { get, writable } from 'svelte/store';
+  import classNames from 'classnames';
   import { v4 as uuid } from 'uuid';
 
   let {
-    // boardSize = 10,
     numberOfShips,
     shipConfig,
   }: {
@@ -18,12 +16,6 @@
   } = useApp();
 
   const { gameConfigTest } = setupService;
-  let boardSize = gameConfigTest.value.boardSize;
-  $inspect(gameConfigTest).with((type, gameConfigTest) => {
-    if (type === 'update') {
-      console.log(1111, 'gameConfigTest', { gameConfigTest });
-    }
-  });
 
   let defendingGridSquares = $derived.by(() => {
     return Array.from(
@@ -35,16 +27,8 @@
         value: i + 1,
         hit: false,
         occupied: Math.random() * 10 >= 7,
-      }),
+      })
     );
-  });
-
-  $inspect(defendingGridSquares).with((type, defendingGridSquaresTest) => {
-    if (type === 'update') {
-      console.log(1111, 'defendingGridSquaresTest', {
-        defendingGridSquaresTest,
-      });
-    }
   });
 
   let attackingGridSquares = $derived.by(() => {
@@ -57,13 +41,13 @@
         value: i + 1,
         hit: false,
         occupied: Math.random() * 10 >= 7,
-      }),
+      })
     );
   });
 
   const handleDefenseClick = (
     e: Event,
-    defenseSquare: Record<string, unknown>,
+    defenseSquare: Record<string, unknown>
   ) => {
     const updatedSquares = defendingGridSquares.map((square) => {
       if (square.id === defenseSquare.id) {
@@ -71,16 +55,12 @@
       }
       return square;
     });
-    console.log(
-      '👽 ~ :53 ~ defenseBoard.update ~ updatedSquares:',
-      updatedSquares,
-    );
     defendingGridSquares = [...updatedSquares];
   };
 
   const handleAttackClick = (
     e: Event,
-    attackSquare: Record<string, unknown>,
+    attackSquare: Record<string, unknown>
   ) => {
     const updatedSquares = attackingGridSquares.map((square) => {
       if (square.id === attackSquare.id) {
@@ -88,20 +68,26 @@
       }
       return square;
     });
-    console.log(
-      '👽 ~ :77 ~ defenseBoard.update ~ updatedSquares:',
-      updatedSquares,
-    );
     attackingGridSquares = [...updatedSquares];
   };
 </script>
 
 <div
-  class="flex flex-row justify-center items-center w-full h-1/2 bg-emerald-700 border-indigo-900 border-2"
+  class="flex flex-row justify-center items-center w-full h-auto bg-emerald-700 border-indigo-900 border-2"
 >
-  <div class=" flex flex-col justify-center items-center h-full w-1/2 gap-2">
+  <div class=" flex flex-col justify-center items-center h-full w-auto gap-2">
     <div
-      class="grid grid-rows-6 grid-cols-6 bg-indigo-200 border-b-blue-950 border-2 w-1/2 h-1/2 gap-4"
+      class={classNames(
+        'grid bg-indigo-200 border-b-blue-950 border-2 w-auto h-1/2 gap-4',
+        {
+          'grid-rows-6': gameConfigTest.value.boardSize === 6,
+          'grid-cols-6': gameConfigTest.value.boardSize === 6,
+          'grid-rows-8': gameConfigTest.value.boardSize === 8,
+          'grid-cols-8': gameConfigTest.value.boardSize === 8,
+          'grid-rows-10': gameConfigTest.value.boardSize === 10,
+          'grid-cols-10': gameConfigTest.value.boardSize === 10,
+        }
+      )}
     >
       {#each defendingGridSquares as defenseSquare (defenseSquare.id)}
         <button
@@ -110,7 +96,7 @@
           }}
           id={defenseSquare.id}
           type="button"
-          class="w-auto h-auto bg-indigo-100 border-b-blue-950 border-2 rounded"
+          class="flex items-center justify-center w-5 h-5 bg-indigo-100 border-b-blue-950 border-2 rounded"
           >{!defenseSquare.hit
             ? ''
             : defenseSquare.occupied
@@ -120,7 +106,17 @@
       {/each}
     </div>
     <div
-      class="grid grid-rows-6 grid-cols-6 bg-indigo-400 border-b-blue-950 border-2 w-1/2 h-1/2 gap-4"
+      class={classNames(
+        'grid  bg-indigo-400 border-b-blue-950 border-2 w-auto h-1/2 gap-4',
+        {
+          'grid-rows-6': gameConfigTest.value.boardSize === 6,
+          'grid-cols-6': gameConfigTest.value.boardSize === 6,
+          'grid-rows-8': gameConfigTest.value.boardSize === 8,
+          'grid-cols-8': gameConfigTest.value.boardSize === 8,
+          'grid-rows-10': gameConfigTest.value.boardSize === 10,
+          'grid-cols-10': gameConfigTest.value.boardSize === 10,
+        }
+      )}
     >
       {#each attackingGridSquares as attackSquare (attackSquare.id)}
         <button
@@ -129,7 +125,7 @@
           }}
           id={attackSquare.id}
           type="button"
-          class="w-auto h-auto bg-indigo-300 border-b-blue-950 border-2 rounded"
+          class="flex items-center justify-center w-5 h-5 bg-indigo-300 border-b-blue-950 border-2 rounded"
           >{!attackSquare.hit ? '' : attackSquare.occupied ? 'O' : 'X'}</button
         >
       {/each}
