@@ -11,12 +11,13 @@
   let {} = $props();
 
   let setupGame = $state(true); //TODO:1111 set to false to run from top
+  let placeShips = false;
 
   const handleClick = () => {
     setupGame = !setupGame;
   };
 
-  const handleInput = (e: string) => {
+  const handleNameInput = (e: string) => {
     gameConfigTest.value.playerInfo.name = e;
   };
 
@@ -41,6 +42,10 @@
     const sideLength = Math.sqrt(boardSize);
     gameConfigTest.value.boardSize = sideLength;
   };
+
+  const handleCLickNext = () => {
+    placeShips = true;
+  };
 </script>
 
 {#if setupGame === false}
@@ -61,7 +66,7 @@
         <label for="playerName"> Enter Name: </label>
         <input
           oninput={(e) => {
-            handleInput(e.currentTarget.value);
+            handleNameInput(e.currentTarget.value);
           }}
           name="playerName"
           type="text"
@@ -108,6 +113,7 @@
         <div class="flex flex-row">
           <input
             value={36}
+            checked
             type="radio"
             id="sm"
             name="board-size"
@@ -145,9 +151,13 @@
 
     <div class="flex flex-row gap-2">
       <!-- TODO:1111 i want to create next section page, maybe plan out what I want one each page -->
-      <!-- <button type="button" class=' border-2 rounded-sm px-2 my-2 ' onclick={handleNext}>
-            Next
-        </button> -->
+      <button
+        type="button"
+        class=" border-2 rounded-sm px-2 my-2"
+        onclick={handleCLickNext}
+      >
+        Next
+      </button>
       <button
         type="button"
         class=" border-2 rounded-sm px-2 my-2"
