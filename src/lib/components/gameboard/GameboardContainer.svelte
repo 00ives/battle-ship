@@ -15,6 +15,9 @@
     services: { setupService },
   } = useApp();
 
+  //need to get the id of the square being hovered and set the hovering prop to true
+  let boat = $state([]);
+
   const { gameConfigTest } = setupService;
 
   let defendingGridSquares = $derived.by(() => {
@@ -27,6 +30,7 @@
         value: i + 1,
         hit: false,
         occupied: Math.random() * 10 >= 7,
+        hovering: false,
       })
     );
   });
@@ -41,6 +45,7 @@
         value: i + 1,
         hit: false,
         occupied: Math.random() * 10 >= 7,
+        hovering: false,
       })
     );
   });
@@ -70,6 +75,35 @@
     });
     attackingGridSquares = [...updatedSquares];
   };
+
+  let mode = $state('setShips');
+
+  //TODO: remove hardcoding for size of board and make it dynamic when the size of board changes same with the ship length
+  const displayShipPreview = (id: string, shipLength = 4, boardSize = 6) => {
+    const shipStartingIndex = defendingGridSquares.findIndex(
+      (square) => square.id === id
+    );
+
+    // console.log(1111, 'index', index);
+    let nextSection = 0;
+
+    const placeholderShip = defendingGridSquares.map((square, index) => {
+      if (
+        index === shipStartingIndex + 6 * nextSection &&
+        shipStartingIndex + 6 * nextSection < defendingGridSquares.length
+      ) {
+        nextSection++;
+        return { ...square, hovering: true };
+      }
+      return { ...square };
+    });
+
+    console.log(1111, 'placeholderShip', placeholderShip);
+
+    defendingGridSquares = [...placeholderShip];
+  };
+
+  const hideShipPreview = (id: string) => {};
 </script>
 
 <div
@@ -90,13 +124,28 @@
       )}
     >
       {#each defendingGridSquares as defenseSquare (defenseSquare.id)}
+        {@const id = defenseSquare.id}
         <button
           onclick={(e: Event) => {
             handleDefenseClick(e, defenseSquare);
           }}
+          onmouseenter={(e: MouseEvent) => {
+            if (mode === 'setShips') {
+              displayShipPreview(id);
+            }
+          }}
+          onmouseleave={(e: MouseEvent) => {
+            hideShipPreview(id);
+          }}
           id={defenseSquare.id}
           type="button"
-          class="flex items-center justify-center w-5 h-5 bg-indigo-100 border-b-blue-950 border-2 rounded"
+          class={classNames(
+            'flex items-center justify-center w-5 h-5  border-b-blue-950 border-2 rounded hover:bg-rose-300 ',
+            {
+              'bg-black': defenseSquare.hovering,
+              'bg-indigo-100': !defenseSquare.hovering,
+            }
+          )}
           >{!defenseSquare.hit
             ? ''
             : defenseSquare.occupied
@@ -125,7 +174,7 @@
           }}
           id={attackSquare.id}
           type="button"
-          class="flex items-center justify-center w-5 h-5 bg-indigo-300 border-b-blue-950 border-2 rounded"
+          class="flex items-center justify-center w-5 h-5 bg-indigo-300 border-b-blue-950 border-2 rounded hover:bg-rose-300"
           >{!attackSquare.hit ? '' : attackSquare.occupied ? 'O' : 'X'}</button
         >
       {/each}
