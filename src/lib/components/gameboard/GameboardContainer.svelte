@@ -31,6 +31,7 @@
         hit: false,
         occupied: Math.random() * 10 >= 7,
         hovering: false,
+        showPreview: false,
       })
     );
   });
@@ -79,31 +80,95 @@
   let mode = $state('setShips');
 
   //TODO: remove hardcoding for size of board and make it dynamic when the size of board changes same with the ship length
-  const displayShipPreview = (id: string, shipLength = 4, boardSize = 6) => {
+  //this is where i left off hardcoded values will make the ship show up and not clear when mouse leaves the area
+  const displayShipPreview = (
+    id: string,
+    e: MouseEvent,
+    shipLength = 4,
+    rowLength = 6,
+    shipDirection = 'horizontal'
+  ) => {
     const shipStartingIndex = defendingGridSquares.findIndex(
       (square) => square.id === id
     );
+    //section for vertical ships
+    if (shipDirection === 'vertical') {
+      const endIndex = shipStartingIndex + rowLength * (shipLength - 1);
+      // console.log(1111, 'display id,e endIndex', { id, e, endIndex });
+      let nextSection = 0;
 
-    // console.log(1111, 'index', index);
-    let nextSection = 0;
-
-    const placeholderShip = defendingGridSquares.map((square, index) => {
-      if (
-        index === shipStartingIndex + 6 * nextSection &&
-        shipStartingIndex + 6 * nextSection < defendingGridSquares.length
-      ) {
-        nextSection++;
-        return { ...square, hovering: true };
+      if (endIndex >= defendingGridSquares.length) {
+        console.log(1111, 'toast');
+        return;
       }
-      return { ...square };
-    });
 
-    console.log(1111, 'placeholderShip', placeholderShip);
+      const placeholderShip = defendingGridSquares.map((square, index) => {
+        if (
+          index === shipStartingIndex + rowLength * nextSection &&
+          shipStartingIndex + rowLength * nextSection <
+            defendingGridSquares.length &&
+          nextSection < shipLength
+        ) {
+          nextSection++;
+          return { ...square, showPreview: true };
+        }
+        return { ...square };
+      });
 
-    defendingGridSquares = [...placeholderShip];
+      // console.log(1111, 'placeholderShip', placeholderShip);
+
+      defendingGridSquares = [...placeholderShip];
+    }
+    //section for horizontal ships
+    if (shipDirection === 'horizontal') {
+      const endIndex = shipStartingIndex + shipLength;
+      //if endIndex is greater then the  row length toast
+
+      //map the next ship size of values and set showPreview to true
+      let nextSection = 0;
+      console.log(
+        1111,
+        'rowLength * Math.floor(shipStartingIndex / rowLength) + 1',
+        {
+          endIndex,
+          rowLength,
+          calc: rowLength * (Math.floor(shipStartingIndex / rowLength) + 1),
+        }
+      );
+      if (
+        endIndex >
+        rowLength * (Math.floor(shipStartingIndex / rowLength) + 1)
+      ) {
+        console.log(1111, 'returned');
+        return;
+      }
+      const placeholderShip = defendingGridSquares.map((square, index) => {
+        if (
+          index === shipStartingIndex + nextSection &&
+          index < shipStartingIndex + shipLength
+        ) {
+          nextSection++;
+          return { ...square, showPreview: true };
+        }
+        return { ...square };
+      });
+      defendingGridSquares = [...placeholderShip];
+    }
   };
 
-  const hideShipPreview = (id: string) => {};
+  const clearShipPreview = (id: string, e: MouseEvent) => {
+    // console.log(1111, 'clear id,e', id, e);
+
+    const shipStartIndex = attackingGridSquares.findIndex(
+      (square) => square.id === id
+    );
+    const clearedSquares = defendingGridSquares.map((square) => ({
+      ...square,
+      showPreview: false,
+    }));
+
+    defendingGridSquares = [...clearedSquares];
+  };
 </script>
 
 <div
@@ -131,19 +196,19 @@
           }}
           onmouseenter={(e: MouseEvent) => {
             if (mode === 'setShips') {
-              displayShipPreview(id);
+              displayShipPreview(id, e);
             }
           }}
           onmouseleave={(e: MouseEvent) => {
-            hideShipPreview(id);
+            clearShipPreview(id, e);
           }}
           id={defenseSquare.id}
           type="button"
           class={classNames(
             'flex items-center justify-center w-5 h-5  border-b-blue-950 border-2 rounded hover:bg-rose-300 ',
             {
-              'bg-black': defenseSquare.hovering,
-              'bg-indigo-100': !defenseSquare.hovering,
+              'bg-black opacity-60': defenseSquare.showPreview,
+              'bg-indigo-100': !defenseSquare.showPreview,
             }
           )}
           >{!defenseSquare.hit
